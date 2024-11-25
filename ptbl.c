@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <sys/mman.h>
 
+#define FOO_FUNC_SECTION __attribute__((aligned(8), section(".foo")))
+
 typedef int (*fn_DBShmCliInit)();
 typedef int (*fn_dbDmNeedHidden)(const char* tbl_name, const char* col_name);
 typedef int (*fn_dbPrintTbl)(const char* tbl_name);
@@ -52,39 +54,42 @@ size_t strlcpy(char *dest, const char *src, size_t size)
 	return ret;
 }
 
-#ifdef __arm__
-// int my_dbDmNeedHidden(const char* tbl_name, const char *col_name)
-// {
-//     return 0;
-// }
-// .text:0001043C 00 00 A0 E3     MOV             R0, #0
-// .text:00010440 1E FF 2F E1     BX              LR
-// or
-// .text:00000508 00 20           MOVS            R0, #0
-// .text:0000050A 70 47           BX              LR
-const unsigned char new_code[] = "\x00\x00\xA0\xE3\x1E\xFF\x2F\xE1";
-//const unsigned char new_code[] = "\x00\x20\x70\x47";
-#elif defined(__MIPSEB__)
-// .text:00000700 03 E0 00 08     jr      $ra
-// .text:00000704 00 00 10 25     move    $v0, $zero
-const unsigned char new_code[] = "\x03\xE0\x00\x08\x00\x00\x10\x25";
-#else
-#error "Only support arm and mipseb!"
-#endif
+FOO_FUNC_SECTION static int ret0()
+{
+	return 0;
+}
+
+FOO_FUNC_SECTION static int ret0_0()
+{
+	return 0;
+}
 
 static int change_code(unsigned char* addr)
 {
-	int ret;
+	int ret = 1;
+	unsigned char* new_code;
+	size_t code_size = 0, i;
+	ssize_t tmp;
 	long page_size = sysconf(_SC_PAGESIZE);
 	void* page_start = (void*)((long)addr & ~(page_size - 1));
+
+	new_code = (unsigned char*)&ret0;
+	tmp = (char*)&ret0 - (char*)&ret0_0;
+	code_size = tmp >= 0 ? tmp : -tmp;
+
+	if(code_size > 64)
+	{
+		fprintf(stderr, "Code size error: %zu\n", code_size);
+		return ret;
+	}
 
 	ret = mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC);
 	if(0 == ret)
 	{
-		const char* tab = "0123456789ABCDEF";
-		int i;
+		static const char* tab = "0123456789ABCDEF";
 		char buf[256];
-		for(i=0; i<sizeof(new_code) - 1; i++)
+
+		for(i=0; i<code_size; i++)
 		{
 			buf[3 * i    ] = tab[addr[i] >> 4];
 			buf[3 * i + 1] = tab[addr[i] & 0xF];
@@ -92,15 +97,16 @@ static int change_code(unsigned char* addr)
 		}
 		buf[3 * i] = '\0';
 		printf("%p original code: %s\n", addr, buf);
-		memcpy(addr, new_code, sizeof(new_code) - 1);
-		for(i=0; i<sizeof(new_code) - 1; i++)
+
+		memcpy(addr, new_code, code_size);
+		for(i=0; i<code_size; i++)
 		{
 			buf[3 * i    ] = tab[addr[i] >> 4];
 			buf[3 * i + 1] = tab[addr[i] & 0xF];
 			buf[3 * i + 2] = ' ';
 		}
 		buf[3 * i] = '\0';
-		printf("%p new code: %s\n", addr, buf);
+		printf("%p      new code: %s\n", addr, buf);
 	}
 	else
 		printf("Failed to make memory writable\n");
