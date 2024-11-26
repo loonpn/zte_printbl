@@ -54,12 +54,12 @@ size_t strlcpy(char *dest, const char *src, size_t size)
 	return ret;
 }
 
-FOO_FUNC_SECTION static int ret0()
+FOO_FUNC_SECTION static int ret0(const char* tbl_name, const char* col_name)
 {
 	return 0;
 }
 
-FOO_FUNC_SECTION static int ret0_0()
+FOO_FUNC_SECTION static int ret0_0(const char* tbl_name, const char* col_name)
 {
 	return 0;
 }
