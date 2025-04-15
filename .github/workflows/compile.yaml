@@ -8,29 +8,14 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-arm64  # 或 windows-11-arm
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Install ARM64 toolchain
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          gcc-aarch64-linux-gnu \
-          libc6-dev-arm64-cross \
-          binutils-aarch64-linux-gnu
-
-    - name: Compile for ARM64
-      run: |
-        aarch64-linux-gnu-gcc -O2 ptbl.c \
-          -ldl \
-          -I/usr/aarch64-linux-gnu/include \
-          -L/usr/aarch64-linux-gnu/lib \
-          -Wl,--export-dynamic \
-          -o ptbl_arm64
+      - uses: actions/checkout@v4
+      - name: Build
+        run: gcc -O2 ptbl.c -ldl -static -o ptbl_arm64 -Wl,--export-dynamic
         
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: arm64-binaries
-        path: ptbl_arm64
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: arm64-binaries
+          path: ptbl_arm64
