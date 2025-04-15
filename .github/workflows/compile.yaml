@@ -12,7 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build
-        run: gcc -O2 ptbl.c -ldl -static -o ptbl_arm64 -Wl,--export-dynamic
+        run: |
+          sudo apt install gcc-arm-linux-gnueabi
+          arm-linux-gnueabi-gcc -O2 -marm ptbl.c -ldl -o ptbl -Wl,--export-dynamic
         
       - name: Upload artifact
         uses: actions/upload-artifact@v4
