@@ -15,7 +15,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc-arm-linux-gnueabi
-          arm-linux-gnueabi-gcc -O2 -marm ptbl.c -ldl -o ptbl -Wl,--export-dynamic
+          arm-linux-gnueabi-gcc -O2 -marm ptbl.c -ldl -o ptbl -static -Wl,--export-dynamic
         
       - name: Upload artifact
         uses: actions/upload-artifact@v4
