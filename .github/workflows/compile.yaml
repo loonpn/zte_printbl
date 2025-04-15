@@ -8,14 +8,15 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04-arm
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: Build
+      - name: Build for arm
         run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-arm-linux-gnueabi
-          arm-linux-gnueabi-gcc -O2 -marm ptbl.c -ldl -o ptbl -static -Wl,--export-dynamic
+          wget https://releases.linaro.org/components/toolchain/binaries/latest-5/arm-linux-gnueabi/gcc-linaro-5.5.0-2017.10-x86_64_arm-linux-gnueabi.tar.xz
+          tar -xf gcc-linaro-5.5.0-2017.10-x86_64_arm-linux-gnueabi
+          ./gcc-linaro-5.5.0-2017.10-x86_64_arm-linux-gnueabi/bin/arm-linux-gnueabi-gcc -O2 -marm ptbl.c -ldl -o ptbl -Wl,--export-dynamic
+          ./gcc-linaro-5.5.0-2017.10-x86_64_arm-linux-gnueabi/bin/arm-linux-gnueabi-strip ptbl
         
       - name: Upload artifact
         uses: actions/upload-artifact@v4
