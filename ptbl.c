@@ -7,16 +7,8 @@
 #include <dlfcn.h>
 #include <unistd.h>
 #include <sys/mman.h>
-#include <arpa/inet.h> 
 
 #define FOO_FUNC_SECTION __attribute__((aligned(8), section(".foo")))
-
-
-const char *IPToStr(unsigned int ip) {
-    struct in_addr addr;
-    addr.s_addr = ip;
-    return inet_ntoa(addr);
-}
 
 typedef int (*fn_DBShmCliInit)();
 typedef int (*fn_dbDmNeedHidden)(const char* tbl_name, const char* col_name);
@@ -131,7 +123,7 @@ static void help(void)
 
 int main(int argc, char* argv[])
 {
-	void *handle = NULL;
+	void *handle = NULL, *comm_handle = NULL;
 	fn_DBShmCliInit DBShmCliInit = NULL;
 	fn_dbDmNeedHidden dbDmNeedHidden = NULL;
 	fn_dbPrintTbl dbPrintTbl = NULL;
@@ -139,12 +131,18 @@ int main(int argc, char* argv[])
 	char cmd[256];
 	int len, ret = 1;
 
-	handle = dlopen("libdb.so", RTLD_LAZY);
-	if(NULL == handle)
-	{
-		fprintf(stderr, "dlopen error: %s\n", dlerror());
-		goto lbl_exit;
-	}
+    comm_handle = dlopen("libcommfun.so", RTLD_LAZY | RTLD_GLOBAL);
+    if (!comm_handle) {
+        fprintf(stderr, "dlopen libcommfun error: %s\n", dlerror());
+        return 1;
+    }
+
+    handle = dlopen("libdb.so", RTLD_LAZY);
+    if (!handle) {
+        fprintf(stderr, "dlopen libdb error: %s\n", dlerror());
+        dlclose(comm_handle);
+        return 1;
+    }
 
 	DBShmCliInit = (fn_DBShmCliInit)dlsym(handle, "DBShmCliInit");
 	dbDmNeedHidden = (fn_dbDmNeedHidden)dlsym(handle, "dbDmNeedHidden");
@@ -197,8 +195,7 @@ int main(int argc, char* argv[])
 
 	ret = 0;
 lbl_exit:
-	if(handle != NULL)
-		dlclose(handle);
-
+	if(handle) dlclose(handle);
+	if (comm_handle) dlclose(comm_handle);
 	return ret;
 }
