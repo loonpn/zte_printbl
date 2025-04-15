@@ -119,6 +119,7 @@ static void help(void)
 	fprintf(stderr, "p <table name> -- print table data.\n");
 	fprintf(stderr, "all            -- print all table name.\n");
 	fprintf(stderr, "exit           -- exit.\n");
+	exit(0);
 }
 
 int main(int argc, char* argv[])
