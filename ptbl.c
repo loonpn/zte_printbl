@@ -7,6 +7,7 @@
 #include <dlfcn.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <arpa/inet.h> 
 
 #define FOO_FUNC_SECTION __attribute__((aligned(8), section(".foo")))
 
