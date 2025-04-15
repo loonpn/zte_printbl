@@ -13,7 +13,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build
         run: |
-          sudo apt install gcc-arm-linux-gnueabi
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-linux-gnueabi
           arm-linux-gnueabi-gcc -O2 -marm ptbl.c -ldl -o ptbl -Wl,--export-dynamic
         
       - name: Upload artifact
