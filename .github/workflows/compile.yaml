@@ -14,7 +14,7 @@ jobs:
       - name: Build for arm
         run: |
           wget https://releases.linaro.org/components/toolchain/binaries/latest-5/arm-linux-gnueabi/gcc-linaro-5.5.0-2017.10-x86_64_arm-linux-gnueabi.tar.xz
-          tar -xf gcc-linaro-5.5.0-2017.10-x86_64_arm-linux-gnueabi
+          tar -xf gcc-linaro-5.5.0-2017.10-x86_64_arm-linux-gnueabi.tar.xz
           ./gcc-linaro-5.5.0-2017.10-x86_64_arm-linux-gnueabi/bin/arm-linux-gnueabi-gcc -O2 -marm ptbl.c -ldl -o ptbl -Wl,--export-dynamic
           ./gcc-linaro-5.5.0-2017.10-x86_64_arm-linux-gnueabi/bin/arm-linux-gnueabi-strip ptbl
         
