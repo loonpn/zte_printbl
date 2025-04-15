@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Install ARM64 toolchain
       run: |
@@ -22,7 +22,7 @@ jobs:
         aarch64-linux-gnu-gcc -O2 ptbl.c -ldl -o ptbl_arm64 -Wl,--export-dynamic
         
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: arm64-binaries
         path: ptbl_arm64
