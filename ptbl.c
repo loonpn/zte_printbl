@@ -10,6 +10,13 @@
 
 #define FOO_FUNC_SECTION __attribute__((aligned(8), section(".foo")))
 
+
+const char *IPToStr(unsigned int ip) {
+    struct in_addr addr;
+    addr.s_addr = ip;
+    return inet_ntoa(addr);
+}
+
 typedef int (*fn_DBShmCliInit)();
 typedef int (*fn_dbDmNeedHidden)(const char* tbl_name, const char* col_name);
 typedef int (*fn_dbPrintTbl)(const char* tbl_name);
